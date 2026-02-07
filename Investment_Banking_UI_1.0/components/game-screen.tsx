@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { Landmark, RotateCcw } from "lucide-react"
+import { Landmark, RotateCcw, Music } from "lucide-react"
+import Link from "next/link"
 import { gameNodes, type GameNode } from "@/lib/game-data"
 import { DealProgressMeter } from "./deal-progress-meter"
 import { GameBoard } from "./game-board"
@@ -65,16 +66,25 @@ export function GameScreen() {
             Investment Banking Explorer
           </p>
         </div>
-        {completedNodes.size > 0 && (
-          <button
-            type="button"
-            onClick={handleReset}
-            className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Reset game"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
-        )}
+        <div className="flex gap-2">
+            <Link
+              href="/music-lab"
+              className="w-8 h-8 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 flex items-center justify-center text-indigo-500 transition-colors"
+              title="Go to Music Lab"
+            >
+              <Music className="w-4 h-4" />
+            </Link>
+            {completedNodes.size > 0 && (
+              <button
+                type="button"
+                onClick={handleReset}
+                className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Reset game"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+            )}
+        </div>
       </header>
 
       {/* Deal progress */}
