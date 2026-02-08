@@ -8,6 +8,7 @@ import { Effects } from './Effects';
 import { Visualizer } from './Visualizer';
 import { RhythmCoach, TutorialStep } from './RhythmCoach';
 import { OpportunitiesModal } from './OpportunitiesModal';
+import { ProducerSpotlight } from './ProducerSpotlight';
 import { Button } from '@/components/ui/button';
 import { Trash2, HelpCircle } from 'lucide-react';
 
@@ -21,6 +22,9 @@ export default function MusicLabDashboard() {
   // Tutorial State
   // Default to null to prevent flash, check localStorage on mount
   const [tutorialStep, setTutorialStep] = useState<TutorialStep | null>(null);
+
+  // HerStory Insights - Track active instrument
+  const [activeInstrument, setActiveInstrument] = useState<string | null>(null);
 
   const [tracks, setTracks] = useState<{ [key: string]: boolean[] }>({
     kick: new Array(16).fill(false),
@@ -127,6 +131,9 @@ export default function MusicLabDashboard() {
   };
 
   const handleToggleStep = (track: string, step: number) => {
+    // Set active instrument for HerStory Insights
+    setActiveInstrument(track);
+
     setTracks(prevTracks => {
       const newTracks = { ...prevTracks };
       newTracks[track] = [...prevTracks[track]];
@@ -231,7 +238,7 @@ export default function MusicLabDashboard() {
                 className="bg-music-primary hover:bg-music-secondary text-white border border-music-primary/30"
               >
                 <HelpCircle className="w-4 h-4 mr-2" />
-                Redo Demo
+                Demo
               </Button>
             </div>
           </div>
@@ -240,6 +247,9 @@ export default function MusicLabDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Main Sequencer Area */}
           <div className="lg:col-span-8 space-y-6">
+            {/* HerStory Insights */}
+            <ProducerSpotlight activeInstrument={activeInstrument} />
+
             <Sequencer
               tracks={tracks}
               currentStep={currentStep}
