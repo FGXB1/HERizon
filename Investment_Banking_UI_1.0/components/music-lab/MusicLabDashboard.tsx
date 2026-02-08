@@ -7,8 +7,9 @@ import { Controls } from './Controls';
 import { Effects } from './Effects';
 import { Visualizer } from './Visualizer';
 import { RhythmCoach, TutorialStep } from './RhythmCoach';
+import { OpportunitiesModal } from './OpportunitiesModal';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Trash2, HelpCircle } from 'lucide-react';
 
 export default function MusicLabDashboard() {
   console.log("MusicLabDashboard v2 rendering");
@@ -223,9 +224,15 @@ export default function MusicLabDashboard() {
               Clear
             </Button>
             <div className="hidden md:block text-right">
-              <div className="text-sm font-mono text-music-primary bg-music-accent/30 px-3 py-1 rounded-full border border-music-primary/30 inline-block">
-                HACKATHON BUILD 2025
-              </div>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={resetTutorial}
+                className="bg-music-primary hover:bg-music-secondary text-white border border-music-primary/30"
+              >
+                <HelpCircle className="w-4 h-4 mr-2" />
+                Redo Demo
+              </Button>
             </div>
           </div>
         </header>
@@ -290,7 +297,9 @@ export default function MusicLabDashboard() {
         onClose={handleTutorialClose}
         onStart={handleTutorialStart}
         onRestart={resetTutorial}
-      />
+      >
+        <OpportunitiesModal />
+      </RhythmCoach>
     </div>
   );
 }
