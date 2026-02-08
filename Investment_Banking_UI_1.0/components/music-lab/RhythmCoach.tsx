@@ -1,54 +1,99 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Mic, ArrowRight, Check } from 'lucide-react';
+import { Mic, ArrowRight, X, Play, Volume2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-export type TutorialStep = 'intro' | 'rhythm-101' | 'grid-demo' | 'interaction' | 'effects' | 'complete';
+export type TutorialStep = 'intro' | 'kick' | 'snare' | 'hihat' | 'reverb' | 'complete';
 
 interface RhythmCoachProps {
-  step: TutorialStep;
-  onNext: () => void;
-  onComplete: () => void;
+  step: TutorialStep | null; // Null means hidden
+  tracks: { [key: string]: boolean[] };
+  reverbMix: number;
+  onNext: (nextStep: TutorialStep) => void;
+  onClose: () => void;
+  onStart: () => void;
 }
 
-const steps = {
+const steps: Record<string, { title: string; text: string; action: string | null; target?: string }> = {
   'intro': {
     title: "Welcome to the Lab",
-    text: "I'm 'The Producer'. I'm here to help you make your first beat. Ready to start?",
-    action: "Let's Go"
+    text: "I'm 'The Producer'. I'm here to help you make your first House beat. Ready to start?",
+    action: "Let's Make a Beat"
   },
-  'rhythm-101': {
-    title: "The Heartbeat",
-    text: "Music is math in time. We are in 4/4 time, meaning 4 beats per bar. See those highlighted numbers? Those are the downbeats.",
-    action: "Got it"
+  'kick': {
+    title: "Step 1: The Foundation",
+    text: "Every house track needs a solid foundation. Place a Kick drum on the downbeats: columns 1, 5, 9, and 13.",
+    action: null, // Auto-advance on pattern match
+    target: "kick"
   },
-  'grid-demo': {
-    title: "The Grid",
-    text: "The rows are your instruments. The columns are when they play. The Kick Drum is the foundation of most beats.",
-    action: "Show me"
+  'snare': {
+    title: "Step 2: The Snap",
+    text: "Now for the energy. The Snare makes you clap. Place a Snare on columns 5 and 13 (layered with the kick).",
+    action: null,
+    target: "snare"
   },
-  'interaction': {
-    title: "Interactive Challenge",
-    text: "Let's make a heartbeat. Place a Kick on Beat 1 (Step 1) and Beat 3 (Step 9).",
-    action: null // Auto-advance
+  'hihat': {
+    title: "Step 3: The Drive",
+    text: "It's too empty between beats. Fill the gaps. Place Hi-Hats on every odd number (3, 7, 11, 15).",
+    action: null,
+    target: "hihat"
   },
-  'effects': {
-    title: "Painting with Sound",
-    text: "Dry signal is boring. Let's add space. Turn the Reverb slider up to at least 50%.",
-    action: null // Auto-advance
+  'reverb': {
+    title: "Step 4: The Vibe",
+    text: "It sounds flat. Let's put it in a room. Click 'Reverb' to turn it on, then set the slider to around 40%.",
+    action: null,
+    target: "reverb"
   },
   'complete': {
     title: "You're a Producer!",
-    text: "You've got the basics down. Now experiment properly! Add some Snare, Hi-Hats, and Melodies.",
+    text: "You just built a standard House drum pattern. This is the skeleton of modern pop music.",
     action: "Free Play"
   }
 };
 
-export function RhythmCoach({ step, onNext, onComplete }: RhythmCoachProps) {
+export function RhythmCoach({ step, tracks, reverbMix, onNext, onClose, onStart }: RhythmCoachProps) {
+
+  // Validation Logic
+  useEffect(() => {
+    if (!step) return;
+
+    let timeout: NodeJS.Timeout;
+
+    const checkPattern = () => {
+      if (step === 'kick') {
+        // Kick on 0, 4, 8, 12 (1, 5, 9, 13)
+        const k = tracks['kick'];
+        if (k[0] && k[4] && k[8] && k[12]) {
+           timeout = setTimeout(() => onNext('snare'), 500);
+        }
+      } else if (step === 'snare') {
+        // Snare on 4, 12 (5, 13)
+        const s = tracks['snare'];
+        if (s[4] && s[12]) {
+           timeout = setTimeout(() => onNext('hihat'), 500);
+        }
+      } else if (step === 'hihat') {
+        // Hi-Hat on 2, 6, 10, 14 (3, 7, 11, 15)
+        const h = tracks['hihat'];
+        if (h[2] && h[6] && h[10] && h[14]) {
+           timeout = setTimeout(() => onNext('reverb'), 500);
+        }
+      } else if (step === 'reverb') {
+        // Reverb around 40% (35-45 range)
+        if (reverbMix >= 35 && reverbMix <= 45) {
+           timeout = setTimeout(() => onNext('complete'), 500);
+        }
+      }
+    };
+
+    checkPattern();
+
+    return () => clearTimeout(timeout);
+  }, [step, tracks, reverbMix, onNext]);
 
   // Confetti on complete
   useEffect(() => {
@@ -79,37 +124,41 @@ export function RhythmCoach({ step, onNext, onComplete }: RhythmCoachProps) {
     }
   }, [step]);
 
-  const content = steps[step];
+  if (!step) return null;
 
-  if (!content && step !== 'complete') return null;
+  const content = steps[step];
+  const isCenter = step === 'intro';
 
   return (
-    <>
-      {/* Overlay - Only show for specific steps where we want to dim the background */}
-      {/* Step 'intro' and 'complete' don't need overlay dimming or have their own style */}
-      {step !== 'intro' && step !== 'complete' && (
-        <div className="fixed inset-0 bg-black/70 z-40 transition-opacity duration-500 pointer-events-none" />
-      )}
-
-      {/* Coach Card */}
-      <div className="fixed bottom-8 right-8 z-[100] max-w-sm w-full perspective-1000">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={step}
-            initial={{ y: 20, opacity: 0, scale: 0.95, rotateX: 10 }}
-            animate={{ y: 0, opacity: 1, scale: 1, rotateX: 0 }}
-            exit={{ y: -20, opacity: 0, scale: 0.95, rotateX: -10 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+    <AnimatePresence mode="wait">
+      <div className={`fixed top-0 left-0 z-[100] pointer-events-none w-screen h-screen flex ${isCenter ? 'items-center justify-center' : 'items-end justify-end p-8'}`}>
+          <div
+            className="pointer-events-auto"
           >
-            <Card className="bg-music-dark/95 backdrop-blur-xl border border-music-primary shadow-[0_10px_40px_-10px_rgba(209,102,102,0.5)] p-6 relative overflow-hidden">
+            <Card className={`
+                bg-music-dark/95 backdrop-blur-xl border border-music-primary shadow-[0_10px_40px_-10px_rgba(209,102,102,0.5)]
+                relative overflow-hidden transition-all duration-500
+                ${isCenter ? 'max-w-md p-8' : 'max-w-sm p-6'}
+            `}>
 
                 {/* Decorative Elements */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-music-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
 
+                {/* Close Button (only if not intro) */}
+                {!isCenter && (
+                    <button
+                        onClick={onClose}
+                        className="absolute top-2 right-2 p-1 text-music-light/50 hover:text-white transition-colors"
+                        aria-label="Close tutorial"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                )}
+
                 <div className="relative z-10 flex flex-col gap-4">
                     {/* Header */}
                     <div className="flex items-center gap-4 border-b border-white/10 pb-4">
-                        <div className="relative">
+                        <div className="relative shrink-0">
                             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-music-primary to-music-secondary flex items-center justify-center border-2 border-white/20 shadow-lg relative z-10">
                                 <Mic className="w-6 h-6 text-white" />
                             </div>
@@ -118,7 +167,7 @@ export function RhythmCoach({ step, onNext, onComplete }: RhythmCoachProps) {
                         <div>
                             <h3 className="font-display font-bold text-white text-lg">The Producer</h3>
                             <div className="flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                <span className={`w-1.5 h-1.5 rounded-full ${step === 'complete' ? 'bg-blue-500' : 'bg-green-500'} animate-pulse`} />
                                 <span className="text-[10px] text-music-light uppercase tracking-widest font-mono">Rhythm Coach</span>
                             </div>
                         </div>
@@ -144,11 +193,29 @@ export function RhythmCoach({ step, onNext, onComplete }: RhythmCoachProps) {
                         </motion.p>
                     </div>
 
+                    {/* Waveform Animation (Only on Complete) */}
+                    {step === 'complete' && (
+                        <div className="h-12 w-full bg-black/20 rounded-lg flex items-center justify-center gap-1 overflow-hidden">
+                            {[...Array(20)].map((_, i) => (
+                                <motion.div
+                                    key={i}
+                                    className="w-1 bg-music-primary/50 rounded-full"
+                                    animate={{ height: [10, 30, 10] }}
+                                    transition={{
+                                        repeat: Infinity,
+                                        duration: 0.5 + Math.random() * 0.5,
+                                        delay: Math.random() * 0.5
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    )}
+
                     {/* Action */}
                     <div className="pt-2">
                         {content?.action ? (
                              <Button
-                                onClick={step === 'complete' ? onComplete : onNext}
+                                onClick={step === 'intro' ? onStart : onClose}
                                 className="w-full bg-music-primary hover:bg-music-secondary text-white font-bold group shadow-lg shadow-music-primary/20"
                             >
                                 {content.action}
@@ -163,9 +230,8 @@ export function RhythmCoach({ step, onNext, onComplete }: RhythmCoachProps) {
                     </div>
                 </div>
             </Card>
-          </motion.div>
-        </AnimatePresence>
+          </div>
       </div>
-    </>
+    </AnimatePresence>
   );
 }
