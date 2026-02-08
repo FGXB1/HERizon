@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "version": "1.0",
+    "style": "short_lines_low_latency",
+    "placeholders": ["{{name}}", "{{exhibit}}", "{{tempo}}", "{{stat}}", "{{choice}}", "{{result}}"]
+  },
+  "global": [
+    {
+      "id": "GLOBAL_WELCOME",
+      "voice": "direct",
+      "trigger": "APP_START",
+      "cooldownMs": 30000,
+      "priority": 10,
+      "text": "Welcome to Herizon. Pick a world you’re curious about. I’ll guide you step by step."
+    },
+    {
+      "id": "GLOBAL_EXPLORE",
+      "voice": "calm",
+      "trigger": "EXPLORE_ENTER",
+      "cooldownMs": 20000,
+      "priority": 9,
+      "text": "This is your universe of industries. You don’t have to finish everything. Pick one that feels interesting today."
+    }
+  ],
+  "musicLab": [
+    {
+      "id": "MUSIC_ENTER",
+      "voice": "calm",
+      "trigger": "MUSIC_ENTER",
+      "cooldownMs": 20000,
+      "priority": 10,
+      "text": "Music Lab. We’re building a confident beat. Start with kick, then snare, then hats. Keep it simple."
+    },
+    {
+      "id": "MUSIC_FINISH",
+      "voice": "direct",
+      "trigger": "MUSIC_FINISH",
+      "cooldownMs": 20000,
+      "priority": 10,
+      "text": "Nice. You made a beat with structure. That’s production, not luck. Want next steps, or try another world?"
+    }
+  ],
+  "pitStopLab": [
+    {
+      "id": "AUTO_ENTER",
+      "voice": "direct",
+      "trigger": "AUTO_ENTER",
+      "cooldownMs": 20000,
+      "priority": 10,
+      "text": "Pit Stop Lab. Your job is tradeoffs: speed, control, reliability. Watch the bars and choose one fix per stop."
+    },
+    {
+      "id": "AUTO_FINISH",
+      "voice": "calm",
+      "trigger": "AUTO_FINISH",
+      "cooldownMs": 20000,
+      "priority": 10,
+      "text": "You finished the run. Strategy is just decision-making with data. That’s a skill you can learn."
+    }
+  ],
+  "dealRoomLab": [
+    {
+      "id": "FIN_ENTER",
+      "voice": "calm",
+      "trigger": "FIN_ENTER",
+      "cooldownMs": 20000,
+      "priority": 10,
+      "text": "Deal Room. We’ll practice how choices change risk and control. One step at a time."
+    }
+  ]
+}
+
