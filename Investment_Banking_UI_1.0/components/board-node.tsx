@@ -1,6 +1,6 @@
 "use client"
 
-import { Building2, User, Zap, Lock, Check } from "lucide-react"
+import { Building2, User, Zap, Lock, Check, MessageCircle } from "lucide-react"
 import type { NodeType } from "@/lib/game-data"
 
 interface BoardNodeProps {
@@ -21,6 +21,8 @@ function NodeIcon({ type, size = 18 }: { type: NodeType; size?: number }) {
       return <Building2 size={size} />
     case "event":
       return <Zap size={size} />
+    case "negotiation":
+      return <MessageCircle size={size} />
   }
 }
 
@@ -45,6 +47,12 @@ const typeStyles: Record<
     completed: "bg-orange-500/15 border-orange-500/50 text-orange-500",
     icon: "text-primary-foreground",
     completedIcon: "text-orange-500",
+  },
+  negotiation: {
+    active: "bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-500/30",
+    completed: "bg-amber-500/15 border-amber-500/50 text-amber-500",
+    icon: "text-white",
+    completedIcon: "text-amber-500",
   },
 }
 

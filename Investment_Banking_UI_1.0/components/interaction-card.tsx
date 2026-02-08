@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, Fragment, useEffect } from "react"
-import { Building2, User, Zap, X, TrendingUp, DollarSign, MapPin } from "lucide-react"
+import { Building2, User, Zap, MessageCircle, X, TrendingUp, DollarSign, MapPin } from "lucide-react"
 import type { GameNode, NodeType } from "@/lib/game-data"
 import { GlossaryTooltip } from "./glossary-tooltip"
 import { getCompanyData } from "@/app/actions"
@@ -29,6 +29,8 @@ function NodeTypeIcon({ type }: { type: NodeType }) {
       return <Building2 className={iconClass} />
     case "event":
       return <Zap className={iconClass} />
+    case "negotiation":
+      return <MessageCircle className={iconClass} />
   }
 }
 
@@ -40,6 +42,8 @@ function typeLabel(type: NodeType) {
       return "Location"
     case "event":
       return "Event"
+    case "negotiation":
+      return "Negotiation"
   }
 }
 
@@ -51,6 +55,8 @@ function typeColor(type: NodeType) {
       return "bg-primary text-primary-foreground"
     case "event":
       return "bg-chart-4 text-card-foreground"
+    case "negotiation":
+      return "bg-amber-500 text-white"
   }
 }
 

@@ -1,23 +1,48 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { Landmark, RotateCcw } from "lucide-react"
 import { gameNodes, type GameNode } from "@/lib/game-data"
+import { negotiationScenarios } from "@/lib/negotiation-data"
 import { DealProgressMeter } from "./deal-progress-meter"
 import { Scene } from "./3d/Scene"
 import { InteractionCard } from "./interaction-card"
+import { NegotiationDialog } from "./negotiation-dialog"
 
 export function GameScreen() {
   const [currentNode, setCurrentNode] = useState(1)
   const [completedNodes, setCompletedNodes] = useState<Set<number>>(new Set())
   const [activeNode, setActiveNode] = useState<GameNode | null>(null)
 
+  // Negotiation state
+  const [showNegotiation, setShowNegotiation] = useState(false)
+  const [negotiationScenarioIndex, setNegotiationScenarioIndex] = useState<number | null>(null)
+  const [negotiationFailed, setNegotiationFailed] = useState(false)
+
+  // Pick a random scenario when the negotiation node is reached
+  const currentScenario = useMemo(() => {
+    if (negotiationScenarioIndex === null) return null
+    return negotiationScenarios[negotiationScenarioIndex]
+  }, [negotiationScenarioIndex])
+
   const handleNodeClick = useCallback(
     (nodeId: number) => {
       // Allow clicking already visited nodes or the current one
       if (nodeId > currentNode) return
       const node = gameNodes.find((n) => n.id === nodeId)
-      if (node) setActiveNode(node)
+      if (!node) return
+
+      // If this is the negotiation node, open the negotiation dialog
+      if (node.type === "negotiation") {
+        // Pick a random scenario each time
+        const idx = Math.floor(Math.random() * negotiationScenarios.length)
+        setNegotiationScenarioIndex(idx)
+        setNegotiationFailed(false)
+        setShowNegotiation(true)
+        return
+      }
+
+      setActiveNode(node)
     },
     [currentNode]
   )
@@ -43,10 +68,39 @@ export function GameScreen() {
     setActiveNode(null)
   }, [])
 
+  const handleNegotiationComplete = useCallback(
+    (passed: boolean) => {
+      if (passed) {
+        // Mark negotiation node as completed and advance
+        setCompletedNodes((prev) => {
+          const next = new Set(prev)
+          const negotiationNode = gameNodes.find((n) => n.type === "negotiation")
+          if (negotiationNode) next.add(negotiationNode.id)
+          return next
+        })
+        const negotiationNode = gameNodes.find((n) => n.type === "negotiation")
+        if (negotiationNode && negotiationNode.id === currentNode && currentNode < gameNodes.length) {
+          setCurrentNode((prev) => prev + 1)
+        }
+        setShowNegotiation(false)
+        setNegotiationScenarioIndex(null)
+      } else {
+        // Failed — offer a retry with a new random scenario
+        setNegotiationFailed(true)
+        setShowNegotiation(false)
+        // Don't advance. The user stays on the negotiation node and has to click again.
+      }
+    },
+    [currentNode]
+  )
+
   const handleReset = useCallback(() => {
     setCurrentNode(1)
     setCompletedNodes(new Set())
     setActiveNode(null)
+    setShowNegotiation(false)
+    setNegotiationScenarioIndex(null)
+    setNegotiationFailed(false)
   }, [])
 
   const allComplete = completedNodes.size === gameNodes.length
@@ -110,6 +164,10 @@ export function GameScreen() {
               <p className="text-center text-sm font-display font-bold text-primary animate-pulse">
                 Deal closed! You finished the Wall Street Walk.
               </p>
+            ) : negotiationFailed ? (
+              <p className="text-center text-xs text-red-500 font-display font-bold">
+                Negotiation failed — tap The Negotiation node to try again with a new scenario
+              </p>
             ) : (
               <p className="text-center text-xs text-muted-foreground">
                 Tap the current node to interact &middot; Node{" "}
@@ -121,7 +179,7 @@ export function GameScreen() {
         </div>
       </div>
 
-      {/* Interaction overlay (Modals) */}
+      {/* Interaction overlay (regular nodes) */}
       {activeNode && (
         <div className="relative z-50">
             <InteractionCard
@@ -129,6 +187,16 @@ export function GameScreen() {
             onClose={handleClose}
             onChoice={handleChoice}
             />
+        </div>
+      )}
+
+      {/* Negotiation overlay */}
+      {showNegotiation && currentScenario && (
+        <div className="relative z-50">
+          <NegotiationDialog
+            scenario={currentScenario}
+            onComplete={handleNegotiationComplete}
+          />
         </div>
       )}
     </div>

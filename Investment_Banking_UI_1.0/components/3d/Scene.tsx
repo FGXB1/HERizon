@@ -17,21 +17,42 @@ interface SceneProps {
 function NodeWrapper({ node, isCompleted, isCurrent, onClick }: any) {
     const isBuilding = node.type === 'building'
     const isCharacter = node.type === 'character'
+    const isNegotiation = node.type === 'negotiation'
 
     return (
         <group position={node.position} onClick={onClick}>
             {/* Visual Representation */}
             {isBuilding ? (
-                // Building
+                // Building with brand name
                  <BlockyBuilding
-                    height={node.id % 2 === 0 ? 8 : 10} // Variation
+                    height={node.id % 2 === 0 ? 8 : 10}
                     width={5}
                     depth={5}
                     color={isCompleted ? "#fbbf24" : isCurrent ? "#3b82f6" : "#cbd5e1"}
+                    brandName={node.companyName}
                 />
             ) : isCharacter ? (
                  // Use BlockyCharacter for NPCs
                  <BlockyCharacter color={isCompleted ? "#fbbf24" : isCurrent ? "#ef4444" : "#cbd5e1"} />
+            ) : isNegotiation ? (
+                // Negotiation marker — glowing diamond with speech icon feel
+                <group>
+                  <mesh position={[0, 2, 0]} rotation={[0, 0, Math.PI / 4]} castShadow>
+                    <octahedronGeometry args={[1.3]} />
+                    <meshStandardMaterial
+                      color={isCompleted ? "#fbbf24" : isCurrent ? "#f59e0b" : "#cbd5e1"}
+                      emissive={isCurrent ? "#f59e0b" : "#000000"}
+                      emissiveIntensity={isCurrent ? 0.5 : 0}
+                    />
+                  </mesh>
+                  {/* Glow ring around negotiation marker */}
+                  {isCurrent && (
+                    <mesh position={[0, 2, 0]} rotation={[-Math.PI/2, 0, 0]}>
+                      <ringGeometry args={[1.5, 1.8, 32]} />
+                      <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={0.8} transparent opacity={0.4} />
+                    </mesh>
+                  )}
+                </group>
             ) : (
                 // Event Marker
                 <mesh position={[0, 1.5, 0]} rotation={[0, 0, Math.PI / 4]} castShadow>
@@ -41,7 +62,7 @@ function NodeWrapper({ node, isCompleted, isCurrent, onClick }: any) {
             )}
 
             {/* Label */}
-            <Html position={[0, isBuilding ? 9 : 3.5, 0]} center>
+            <Html position={[0, isBuilding ? 12 : 3.5, 0]} center>
                 <div
                     className={`
                         px-2 py-1 rounded-md border shadow-sm backdrop-blur-sm transition-all cursor-pointer select-none
@@ -66,10 +87,7 @@ export function Scene({ currentNode, completedNodes, onNodeClick }: SceneProps) 
   // Precompute node positions along the street
   const nodePositions = useMemo(() => {
     return gameNodes.map((node, index) => {
-      // Start slightly forward so node 1 is visible
-      const z = -index * 24 // Increased spacing for density feel
-      // Alternate left/right. index 0 is left (-14), index 1 is right (14)
-      // Matches the building layout in CityEnvironment (approx +/- 14)
+      const z = -index * 24
       const x = index % 2 === 0 ? -14 : 14
       return { ...node, position: [x, 0, z] as [number, number, number] }
     })

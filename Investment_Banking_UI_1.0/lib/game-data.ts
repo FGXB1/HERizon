@@ -1,4 +1,4 @@
-export type NodeType = "character" | "building" | "event"
+export type NodeType = "character" | "building" | "event" | "negotiation"
 
 export interface GameNode {
   id: number
@@ -426,8 +426,24 @@ export const gameNodes: GameNode[] = [
       },
     ],
   },
+  // NODE 12: The Negotiation (new type — triggers NegotiationDialog)
   {
     id: 12,
+    label: "The Negotiation",
+    type: "negotiation",
+    description:
+      "It's time for the final negotiation. Everything you've learned throughout your Wall Street journey comes down to this moment. Your mentor Victoria Chen is by your side. Choose your words carefully — one wrong move and the deal falls apart.",
+    choices: [],
+    glossaryTerms: [
+      {
+        term: "negotiation",
+        definition:
+          "The process of discussion and compromise between parties to reach a mutually acceptable agreement on deal terms.",
+      },
+    ],
+  },
+  {
+    id: 13,
     label: "Deal Closed!",
     type: "event",
     description:
