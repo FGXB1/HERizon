@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { AudioEngine } from '@/lib/audio-engine';
-import { Sequencer3D } from './Sequencer3D';
+import { Sequencer } from './Sequencer';
 import { Controls } from './Controls';
 import { Effects } from './Effects';
 import { Visualizer } from './Visualizer';
@@ -52,25 +52,25 @@ export default function MusicLabDashboard() {
     // State
     const savedState = localStorage.getItem('musicLabState');
     if (savedState) {
-        try {
-            const parsed = JSON.parse(savedState);
-            if (parsed.tracks) setTracks(parsed.tracks);
-            if (parsed.tempo) setTempo(parsed.tempo);
-            if (parsed.effects) setEffects(parsed.effects);
-            if (parsed.reverbMix !== undefined) setReverbMix(parsed.reverbMix);
-        } catch (e) {
-            console.error("Failed to parse musicLabState", e);
-        }
+      try {
+        const parsed = JSON.parse(savedState);
+        if (parsed.tracks) setTracks(parsed.tracks);
+        if (parsed.tempo) setTempo(parsed.tempo);
+        if (parsed.effects) setEffects(parsed.effects);
+        if (parsed.reverbMix !== undefined) setReverbMix(parsed.reverbMix);
+      } catch (e) {
+        console.error("Failed to parse musicLabState", e);
+      }
     }
   }, []);
 
   // Save Persistence
   useEffect(() => {
     const state = {
-        tracks,
-        tempo,
-        effects,
-        reverbMix
+      tracks,
+      tempo,
+      effects,
+      reverbMix
     };
     localStorage.setItem('musicLabState', JSON.stringify(state));
   }, [tracks, tempo, effects, reverbMix]);
@@ -84,15 +84,15 @@ export default function MusicLabDashboard() {
 
     // Sync Effects
     Object.entries(effects).forEach(([effect, active]) => {
-        engineRef.current!.setEffect(effect as any, active);
+      engineRef.current!.setEffect(effect as any, active);
     });
     engineRef.current.setReverbMix(reverbMix / 100);
 
     // Sync Tracks
     Object.keys(tracks).forEach(key => {
-        tracks[key].forEach((active, step) => {
-            engineRef.current!.setTrackStep(key, step, active);
-        });
+      tracks[key].forEach((active, step) => {
+        engineRef.current!.setTrackStep(key, step, active);
+      });
     });
 
   }, [tracks, tempo, effects, reverbMix]); // Run whenever state changes
@@ -137,7 +137,7 @@ export default function MusicLabDashboard() {
   const handleClear = () => {
     const clearedTracks = { ...tracks };
     Object.keys(clearedTracks).forEach(key => {
-        clearedTracks[key] = new Array(16).fill(false);
+      clearedTracks[key] = new Array(16).fill(false);
     });
     setTracks(clearedTracks);
   };
@@ -154,7 +154,7 @@ export default function MusicLabDashboard() {
   const handleTutorialNext = (nextStep: TutorialStep) => {
     setTutorialStep(nextStep);
     if (nextStep === 'complete') {
-        localStorage.setItem('musicLabTutorialComplete', 'true');
+      localStorage.setItem('musicLabTutorialComplete', 'true');
     }
   };
 
@@ -213,27 +213,27 @@ export default function MusicLabDashboard() {
             <p className="text-music-light/80 text-lg">Make a beat that feels confident</p>
           </div>
           <div className="flex gap-4 items-center">
-             <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleClear}
-                className="bg-music-secondary hover:bg-music-accent text-white border border-music-primary/30"
-             >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Clear
-             </Button>
-             <div className="hidden md:block text-right">
-                <div className="text-sm font-mono text-music-primary bg-music-accent/30 px-3 py-1 rounded-full border border-music-primary/30 inline-block">
-                    HACKATHON BUILD 2025
-                </div>
-             </div>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleClear}
+              className="bg-music-secondary hover:bg-music-accent text-white border border-music-primary/30"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Clear
+            </Button>
+            <div className="hidden md:block text-right">
+              <div className="text-sm font-mono text-music-primary bg-music-accent/30 px-3 py-1 rounded-full border border-music-primary/30 inline-block">
+                HACKATHON BUILD 2025
+              </div>
+            </div>
           </div>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Main Sequencer Area */}
           <div className="lg:col-span-8 space-y-6">
-            <Sequencer3D
+            <Sequencer
               tracks={tracks}
               currentStep={currentStep}
               onToggleStep={handleToggleStep}
@@ -243,7 +243,7 @@ export default function MusicLabDashboard() {
             />
 
             <div className="bg-music-accent/20 rounded-xl p-6 border border-music-light/10 backdrop-blur-sm">
-                <Visualizer analyser={analyser} />
+              <Visualizer analyser={analyser} />
             </div>
           </div>
 
@@ -267,14 +267,14 @@ export default function MusicLabDashboard() {
 
               <div className="bg-music-light/10 p-6 rounded-xl border border-music-light/20">
                 <h3 className="text-music-primary font-bold mb-3 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-music-primary animate-pulse"></span>
-                    Quick Tips
+                  <span className="w-2 h-2 rounded-full bg-music-primary animate-pulse"></span>
+                  Quick Tips
                 </h3>
                 <ul className="text-sm text-music-light space-y-2 list-disc pl-4">
-                    <li>Start with a steady Kick on beats 1, 5, 9, 13.</li>
-                    <li>Add a Snare on 5 and 13 for a classic backbeat.</li>
-                    <li>Hi-Hats add speed and texture!</li>
-                    <li>Use Effects to change the vibe.</li>
+                  <li>Start with a steady Kick on beats 1, 5, 9, 13.</li>
+                  <li>Add a Snare on 5 and 13 for a classic backbeat.</li>
+                  <li>Hi-Hats add speed and texture!</li>
+                  <li>Use Effects to change the vibe.</li>
                 </ul>
               </div>
             </div>

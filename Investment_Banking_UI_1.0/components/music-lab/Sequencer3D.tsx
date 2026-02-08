@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Text, RoundedBox, Float, PerspectiveCamera, OrbitControls, Environment, ContactShadows } from '@react-three/drei';
+import { Text, RoundedBox, Float, OrthographicCamera, OrbitControls, Environment, ContactShadows } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { cn } from '@/lib/utils';
@@ -95,11 +95,11 @@ function StepBox({
 
     // Highlight pulse for tutorial
     if (isHighlighted && !isActive) {
-       const pulse = (Math.sin(state.clock.elapsedTime * 10) + 1) / 2; // 0 to 1
-       // We can modulate opacity or color manually if needed, but scale/emissive is easier
-       // Let's make it pulse in size slightly
-       const highlightScale = 1 + pulse * 0.2;
-       if (!hovered) meshRef.current.scale.setScalar(highlightScale);
+      const pulse = (Math.sin(state.clock.elapsedTime * 10) + 1) / 2; // 0 to 1
+      // We can modulate opacity or color manually if needed, but scale/emissive is easier
+      // Let's make it pulse in size slightly
+      const highlightScale = 1 + pulse * 0.2;
+      if (!hovered) meshRef.current.scale.setScalar(highlightScale);
     }
   });
 
@@ -110,37 +110,37 @@ function StepBox({
 
   return (
     <RoundedBox
-        ref={meshRef}
-        args={[1, 1, 0.2]} // Width, Height, Depth
-        position={position}
-        radius={0.1}
-        smoothness={4}
-        onClick={(e) => {
-            e.stopPropagation();
-            if (isInteractive) onClick();
-        }}
-        onPointerOver={() => isInteractive && setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-        castShadow
-        receiveShadow
-        >
-        {isActive ? (
-            <meshBasicMaterial
-                color={materialEmissive} // Use brighter emissive color for neon look
-                toneMapped={false}
-            />
-        ) : (
-            <meshStandardMaterial
-                color={materialColor}
-                emissive={materialEmissive}
-                emissiveIntensity={materialEmissiveIntensity}
-                transparent
-                opacity={materialOpacity}
-                roughness={0.2}
-                metalness={0.1}
-                toneMapped={false}
-            />
-        )}
+      ref={meshRef}
+      args={[1, 1, 0.2]} // Width, Height, Depth
+      position={position}
+      radius={0.1}
+      smoothness={4}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (isInteractive) onClick();
+      }}
+      onPointerOver={() => isInteractive && setHovered(true)}
+      onPointerOut={() => setHovered(false)}
+      castShadow
+      receiveShadow
+    >
+      {isActive ? (
+        <meshBasicMaterial
+          color={materialEmissive} // Use brighter emissive color for neon look
+          toneMapped={false}
+        />
+      ) : (
+        <meshStandardMaterial
+          color={materialColor}
+          emissive={materialEmissive}
+          emissiveIntensity={materialEmissiveIntensity}
+          transparent
+          opacity={materialOpacity}
+          roughness={0.1}
+          metalness={0.3}
+          toneMapped={false}
+        />
+      )}
     </RoundedBox>
   );
 }
@@ -157,58 +157,58 @@ function Playhead({ currentStep }: { currentStep: number }) {
 
   useFrame(() => {
     if (ref.current) {
-        ref.current.position.x = THREE.MathUtils.lerp(ref.current.position.x, targetX, 0.2);
+      ref.current.position.x = THREE.MathUtils.lerp(ref.current.position.x, targetX, 0.2);
     }
   });
 
   return (
     <group ref={ref}>
-        {/* Laser Line */}
-        <mesh position={[0, 0, 0.5]}>
-            <boxGeometry args={[0.1, 9, 0.1]} />
-            <meshBasicMaterial color="#ffffff" toneMapped={false} />
-        </mesh>
-        {/* Glow */}
-        <pointLight color="#ffffff" intensity={2} distance={5} decay={2} />
+      {/* Laser Line */}
+      <mesh position={[0, 0, 0.5]}>
+        <boxGeometry args={[0.1, 9, 0.1]} />
+        <meshBasicMaterial color="#ffffff" toneMapped={false} />
+      </mesh>
+      {/* Glow */}
+      <pointLight color="#ffffff" intensity={2} distance={5} decay={2} />
     </group>
   );
 }
 
 function TrackLabel({ position, text, isActive }: { position: [number, number, number], text: string, isActive: boolean }) {
-    return (
-        <Text
-            position={position}
-            fontSize={0.4}
-            color={isActive ? "#ffffff" : "#888888"}
-            anchorX="right"
-            anchorY="middle"
-        >
-            {text}
-        </Text>
-    );
+  return (
+    <Text
+      position={position}
+      fontSize={0.4}
+      color={isActive ? "#ffffff" : "#888888"}
+      anchorX="right"
+      anchorY="middle"
+    >
+      {text}
+    </Text>
+  );
 }
 
 function StepLabel({ position, text, isActive }: { position: [number, number, number], text: string, isActive: boolean }) {
-    return (
-        <Text
-            position={position}
-            fontSize={0.3}
-            color={isActive ? "#ffffff" : "#444444"}
-            anchorX="center"
-            anchorY="bottom"
-        >
-            {text}
-        </Text>
-    );
+  return (
+    <Text
+      position={position}
+      fontSize={0.3}
+      color={isActive ? "#ffffff" : "#444444"}
+      anchorX="center"
+      anchorY="bottom"
+    >
+      {text}
+    </Text>
+  );
 }
 
 function Scene({
-    tracks,
-    currentStep,
-    onToggleStep,
-    highlightRow,
-    highlightColumns,
-    isInteractive
+  tracks,
+  currentStep,
+  onToggleStep,
+  highlightRow,
+  highlightColumns,
+  isInteractive
 }: Sequencer3DProps) {
 
   // Track keys to iterate
@@ -227,68 +227,70 @@ function Scene({
 
         {/* Rows */}
         {trackKeys.map((trackKey, trackIndex) => {
-            // Y position: Map 0..6 to top..bottom or bottom..top?
-            // Usually Kick is bottom in DAWs, but Sequencer.tsx has Kick at top visually (index 0).
-            // Let's keep Kick at top (positive Y) for consistency with 2D.
-            // Center Y: 7 rows (0 to 6). Center is 3.
-            // y = (3 - trackIndex) * spacing
-            const y = (3 - trackIndex) * STEP_SPACING_Y;
+          // Y position: Map 0..6 to top..bottom or bottom..top?
+          // Usually Kick is bottom in DAWs, but Sequencer.tsx has Kick at top visually (index 0).
+          // Let's keep Kick at top (positive Y) for consistency with 2D.
+          // Center Y: 7 rows (0 to 6). Center is 3.
+          // y = (3 - trackIndex) * spacing
+          const y = (3 - trackIndex) * STEP_SPACING_Y;
 
-            const steps = tracks[trackKey];
-            const isRowHighlighted = highlightRow === trackKey;
+          const steps = tracks[trackKey];
+          const isRowHighlighted = highlightRow === trackKey;
 
-            return (
-                <group key={trackKey}>
-                    {/* Track Label */}
-                    <TrackLabel
-                        position={[-8.5 * STEP_SPACING_X, y, 0]}
-                        text={trackNames[trackKey] || trackKey}
-                        isActive={isRowHighlighted}
+          return (
+            <group key={trackKey}>
+              {/* Track Label */}
+              <TrackLabel
+                position={[-8.5 * STEP_SPACING_X, y, 0]}
+                text={trackNames[trackKey] || trackKey}
+                isActive={isRowHighlighted}
+              />
+
+              {/* Steps */}
+              {steps.map((isActive, stepIndex) => {
+                // X position: (step - 7.5) * spacing
+                const x = (stepIndex - 7.5) * STEP_SPACING_X;
+
+                const isColHighlighted = highlightColumns?.includes(stepIndex) && isRowHighlighted;
+                const isCurrent = currentStep === stepIndex;
+
+                return (
+                  <React.Fragment key={`${trackKey}-${stepIndex}`}>
+                    {/* Step Number Label (only for first row or separate header?) */}
+                    {trackIndex === 0 && (
+                      <StepLabel
+                        position={[x, y + 0.8, 0]}
+                        text={(stepIndex + 1).toString()}
+                        isActive={isColHighlighted || isCurrent}
+                      />
+                    )}
+
+                    <StepBox
+                      position={[x, y, 0]}
+                      isActive={isActive}
+                      isCurrent={isCurrent}
+                      color={trackColors[trackKey] || '#ffffff'}
+                      emissiveColor={trackEmissive[trackKey] || '#ffffff'}
+                      onClick={() => onToggleStep(trackKey, stepIndex)}
+                      isInteractive={isInteractive !== false}
+                      isHighlighted={!!isColHighlighted}
+                      trackName={trackKey}
+                      stepIndex={stepIndex}
                     />
-
-                    {/* Steps */}
-                    {steps.map((isActive, stepIndex) => {
-                         // X position: (step - 7.5) * spacing
-                         const x = (stepIndex - 7.5) * STEP_SPACING_X;
-
-                         const isColHighlighted = highlightColumns?.includes(stepIndex) && isRowHighlighted;
-                         const isCurrent = currentStep === stepIndex;
-
-                         return (
-                            <React.Fragment key={`${trackKey}-${stepIndex}`}>
-                                {/* Step Number Label (only for first row or separate header?) */}
-                                {trackIndex === 0 && (
-                                    <StepLabel
-                                        position={[x, y + 0.8, 0]}
-                                        text={(stepIndex + 1).toString()}
-                                        isActive={isColHighlighted || isCurrent}
-                                    />
-                                )}
-
-                                <StepBox
-                                    position={[x, y, 0]}
-                                    isActive={isActive}
-                                    isCurrent={isCurrent}
-                                    color={trackColors[trackKey] || '#ffffff'}
-                                    emissiveColor={trackEmissive[trackKey] || '#ffffff'}
-                                    onClick={() => onToggleStep(trackKey, stepIndex)}
-                                    isInteractive={isInteractive !== false}
-                                    isHighlighted={!!isColHighlighted}
-                                    trackName={trackKey}
-                                    stepIndex={stepIndex}
-                                />
-                            </React.Fragment>
-                         );
-                    })}
-                </group>
-            );
+                  </React.Fragment>
+                );
+              })}
+            </group>
+          );
         })}
       </group>
+
+      <Environment preset="city" />
 
       <ContactShadows position={[0, -5, 0]} opacity={0.5} scale={40} blur={2} far={4.5} />
 
       {/* Post Processing */}
-      <EffectComposer disableNormalPass>
+      <EffectComposer>
         <Bloom luminanceThreshold={0.4} mipmapBlur intensity={2.0} radius={0.6} />
       </EffectComposer>
     </>
@@ -303,16 +305,16 @@ export function Sequencer3D(props: Sequencer3DProps) {
       {/* Hidden Accessibility/Test Overlay */}
       <div className="sr-only">
         {Object.entries(tracks).map(([trackName, steps]) => (
-            <div key={trackName}>
-                {steps.map((_, stepIndex) => (
-                    <button
-                        key={stepIndex}
-                        onClick={() => isInteractive && onToggleStep(trackName, stepIndex)}
-                        aria-label={`Toggle ${trackName} step ${stepIndex + 1}`}
-                        disabled={!isInteractive}
-                    />
-                ))}
-            </div>
+          <div key={trackName}>
+            {steps.map((_, stepIndex) => (
+              <button
+                key={stepIndex}
+                onClick={() => isInteractive && onToggleStep(trackName, stepIndex)}
+                aria-label={`Toggle ${trackName} step ${stepIndex + 1}`}
+                disabled={!isInteractive}
+              />
+            ))}
+          </div>
         ))}
       </div>
 
@@ -322,15 +324,14 @@ export function Sequencer3D(props: Sequencer3DProps) {
       </div>
 
       <Canvas shadows dpr={[1, 2]} gl={{ preserveDrawingBuffer: true, antialias: true, toneMapping: THREE.ReinhardToneMapping, toneMappingExposure: 1.5 }}>
-        <PerspectiveCamera makeDefault position={[0, 0, 24]} fov={50} />
-        {/* OrbitControls allowed but restricted for "Dashboard" feel? */}
+        <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={35} />
+        {/* OrbitControls locked to 2D */}
         <OrbitControls
-            enablePan={false}
-            enableZoom={true}
-            minPolarAngle={Math.PI / 4}
-            maxPolarAngle={Math.PI / 1.5}
-            minAzimuthAngle={-Math.PI / 4}
-            maxAzimuthAngle={Math.PI / 4}
+          enablePan={true}
+          enableRotate={false}
+          enableZoom={true}
+          minZoom={20}
+          maxZoom={50}
         />
 
         <Scene {...props} />
