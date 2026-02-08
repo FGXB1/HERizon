@@ -8,7 +8,7 @@ import { Effects } from './Effects';
 import { Visualizer } from './Visualizer';
 import { RhythmCoach, TutorialStep } from './RhythmCoach';
 import { Button } from '@/components/ui/button';
-import { Trash2, HelpCircle } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 export default function MusicLabDashboard() {
   console.log("MusicLabDashboard v2 rendering");
@@ -186,6 +186,12 @@ export default function MusicLabDashboard() {
   } else if (tutorialStep === 'hihat') {
     highlightRow = 'hihat';
     highlightColumns = [2, 6, 10, 14];
+  } else if (tutorialStep === 'bass') {
+    highlightRow = 'bass';
+    highlightColumns = [2, 6, 10, 14];
+  } else if (tutorialStep === 'synth') {
+    highlightRow = 'synth';
+    highlightColumns = [4, 12];
   } else if (tutorialStep === 'reverb') {
     highlightEffects = true;
   }
@@ -205,16 +211,6 @@ export default function MusicLabDashboard() {
             <p className="text-music-light/80 text-lg">Make a beat that feels confident</p>
           </div>
           <div className="flex gap-4 items-center">
-             <Button
-                variant="ghost"
-                size="icon"
-                onClick={resetTutorial}
-                className="text-music-primary hover:text-white hover:bg-music-primary/20"
-                title="Restart Coach"
-             >
-                <HelpCircle className="w-6 h-6" />
-             </Button>
-
              <Button
                 variant="destructive"
                 size="sm"
@@ -291,6 +287,7 @@ export default function MusicLabDashboard() {
         onNext={handleTutorialNext}
         onClose={handleTutorialClose}
         onStart={handleTutorialStart}
+        onRestart={resetTutorial}
       />
     </div>
   );
