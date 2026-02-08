@@ -1,18 +1,5 @@
 export type GameState = 'racing' | 'pit_stop' | 'finished';
 
-export type PitStopAction = 'change_tires' | 'refuel' | 'fix_engine';
-
-export interface PitChange {
-  action: PitStopAction;
-  cost: number;
-}
-
-export interface PitStopRecord {
-  lap: number;
-  durationMs: number;
-  changes: PitChange[];
-}
-
 export interface CarStats {
   speed: number;        // km/h
   fuel: number;         // percentage 0-100
@@ -21,7 +8,7 @@ export interface CarStats {
   lap: number;
   totalLaps: number;
   position: number;
-  pitStops: PitStopRecord[]; // History of pit stops
+  pitStops: number;     // Number of pit stops taken
 }
 
 export const INITIAL_STATS: CarStats = {
@@ -32,8 +19,10 @@ export const INITIAL_STATS: CarStats = {
   lap: 1,
   totalLaps: 5,
   position: 1,
-  pitStops: [],
+  pitStops: 0,
 };
+
+export type PitStopAction = 'change_tires' | 'refuel' | 'fix_engine';
 
 export interface PitStopOption {
   id: PitStopAction;
